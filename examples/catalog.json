@@ -1,0 +1,7 @@
+[
+  { "name": "identity", "team": "platform", "docs": true, "oncall": true, "slo": 99.95, "coverage": 88, "runbook": true, "deps": [] },
+  { "name": "payments-api", "team": "payments", "docs": true, "oncall": true, "slo": 99.9, "coverage": 76, "runbook": true, "deps": ["identity"] },
+  { "name": "ledger-worker", "team": "payments", "docs": true, "oncall": true, "slo": 99.9, "coverage": 61, "deps": ["payments-api"] },
+  { "name": "storefront", "team": "growth", "docs": true, "slo": 99.5, "coverage": 70, "runbook": true, "deps": ["payments-api", "identity"] },
+  { "name": "legacy-reports", "docs": false, "slo": 0, "coverage": 12, "deprecatedDeps": true, "deps": ["ledger-worker"] }
+]

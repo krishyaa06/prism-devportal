@@ -1,0 +1,43 @@
+{
+  "name": "prism-devportal",
+  "version": "1.0.0",
+  "description": "Prism DevPortal is an Internal Developer Platform engine: service catalog with scorecards, golden-path templates that render real Kubernetes manifests, a kube-scheduler-style cluster simulator, rolling updates and SLO burn-rate auto-rollback.",
+  "type": "module",
+  "bin": {
+    "idp": "bin/idp.js"
+  },
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "npx --yes serve ."
+  },
+  "keywords": [
+    "internal-developer-platform",
+    "platform-engineering",
+    "backstage",
+    "kubernetes",
+    "devops",
+    "sre",
+    "slo",
+    "service-catalog",
+    "simulator",
+    "javascript"
+  ],
+  "author": "Soumya Bhandare (krishyaa06)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krishyaa06/prism-devportal.git"
+  },
+  "homepage": "https://krishyaa06.github.io/prism-devportal/",
+  "engines": {
+    "node": ">=18.17"
+  }
+}

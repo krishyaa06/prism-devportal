@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prism DevPortal · Internal Developer Platform: catalog, golden paths, releases, SLO auto-rollback · Prism Systems</title>
+  <meta name="description" content="Prism DevPortal is an Internal Developer Platform engine: service catalog with scorecards, golden-path templates that render real Kubernetes manifests, a kube-scheduler-style cluster simulator, rolling updates and SLO burn-rate auto-rollback." />
+  <meta name="theme-color" content="#06070d" />
+  <meta property="og:title" content="Prism DevPortal · Prism Systems" />
+  <meta property="og:description" content="Prism DevPortal is an Internal Developer Platform engine: service catalog with scorecards, golden-path templates that render real Kubernetes manifests, a kube-scheduler-style cluster simulator, rolling updates and SLO burn-rate auto-rollback." />
+  <meta property="og:image" content="https://krishyaa06.github.io/prism-devportal/assets/screenshots/desktop.png" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pro.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <style>:root{--accent:#7C5CFF;--accent-2:#00D2FF}</style>
+</head>
+<body>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <header class="topbar"><div class="wrap">
+    <a class="brand" href="./"><span class="mark">◆</span><b>PRISM</b><span>DevPortal</span></a>
+    <nav>
+      <a class="nl" href="#sim">Simulator</a><a class="nl" href="#features">Features</a><a class="nl" href="#how">How it works</a><a class="nl" href="#arch">Architecture</a><a class="nl" href="#use">Use it</a>
+      <a class="btn sm" href="https://github.com/krishyaa06/prism-devportal" target="_blank" rel="noreferrer">★ GitHub</a>
+    </nav>
+  </div></header>
+  <main>
+    <section class="hero wrap">
+      <p class="eyebrow"><span class="n">01 / 49</span>Prism Systems · Cloud-Native &amp; Developer Infrastructure</p>
+      <h1>Your <em>Internal Developer Platform</em>, from golden path to auto-rollback</h1>
+      <p class="lead">Backstage-style service catalog, golden-path provisioning, Kubernetes-like scheduling, rolling releases and SLO burn-rate auto-rollback — in one zero-dependency engine with a live simulator.</p>
+      <div class="cta"><a class="btn primary" href="#sim">▶ Launch the simulator</a><a class="btn" href="#use">Use the engine</a><a class="btn ghost" href="https://github.com/krishyaa06/prism-devportal" target="_blank" rel="noreferrer">View source →</a></div>
+      <div class="chips"><span class="chip"><i></i>Zero dependencies</span><span class="chip"><i></i>Real K8s YAML</span><span class="chip"><i></i>Multi-window burn rate</span><span class="chip"><i></i>Live simulator</span><span class="chip"><i></i>CLI + ESM API</span></div>
+    </section>
+    <section class="section wrap" id="sim">
+      <div class="sec-head"><span class="kicker">Live simulator</span><h2>A live platform you can break</h2><p>Five services run on a five-node cluster. Ship a bad release and watch the burn-rate alert roll it back, kill a node and watch pods reschedule, or provision a new service from a golden path.</p></div>
+<div class="sim">
+  <div class="main">
+    <div class="panel glow">
+      <div class="toolbar">
+        <button class="btn primary sm" data-play>▶ Run</button>
+        <select data-speed aria-label="Speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select>
+        <span class="sep"></span>
+        <select id="svc" aria-label="Service"></select>
+        <button class="btn sm" id="deploy">Deploy next</button>
+        <button class="btn sm bad" id="bad">Ship bad release</button>
+        <button class="btn sm" id="rollback">Rollback</button>
+        <button class="btn sm" id="scale">Scale +1</button>
+        <span class="sep"></span>
+        <button class="btn sm ghost" id="kill">Kill a node</button>
+        <span class="sp"></span>
+        <span class="live"><i></i> paused</span>
+      </div>
+      <div id="kpis" style="margin-top:12px"></div>
+    </div>
+    <div class="viz" id="cvw" style="height:270px"><span class="tag">Cluster · nodes &amp; pods (color = service, ring = version)</span><canvas id="cv"></canvas></div>
+    <div class="g2 grid">
+      <div class="panel"><div class="ph">Error ratio · selected service<span class="sp"></span><span class="pill" id="burn">burn 0×</span></div><canvas class="chart" id="ch1" style="height:150px"></canvas></div>
+      <div class="panel"><div class="ph">p95 latency · rps</div><canvas class="chart" id="ch2" style="height:150px"></canvas></div>
+    </div>
+    <div class="panel"><div class="ph">Service catalog<span class="sp"></span><span class="pill dim" id="ord"></span></div>
+      <div class="scroll" style="max-height:260px"><table class="tbl" id="cat"><thead><tr><th>Service</th><th>Team</th><th>Version</th><th class="r">Ready</th><th class="r">RPS</th><th class="r">p95</th><th class="r">Errors</th><th>Scorecard</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><div class="ph">Golden path · new service</div>
+      <label class="f">Name <input id="nm" value="checkout-api" spellcheck="false" /></label>
+      <label class="f">Template <select id="tpl"></select></label>
+      <label class="f">Team <select id="team"><option>payments</option><option>growth</option><option>platform</option><option>data</option></select></label>
+      <button class="btn primary" id="create" style="width:100%;margin-top:6px">Provision service</button>
+      <div id="steps" class="log" style="height:150px;margin-top:10px"><div><span class="dim">Pick a name + template, then provision. The pipeline scaffolds, registers and deploys v1.0.0.</span></div></div>
+    </div>
+    <div class="panel"><div class="ph">Release history</div><div id="hist" class="log" style="height:150px"></div></div>
+    <div class="panel"><div class="ph">Platform events</div><div id="log" class="log" style="height:230px"></div></div>
+    <div class="panel"><div class="ph">Generated manifest</div><pre id="yaml" class="log" style="height:180px;white-space:pre"></pre></div>
+  </div>
+</div>
+
+    </section>
+    <section class="section wrap" id="features">
+      <div class="sec-head reveal"><span class="kicker">Features</span><h2>What's inside the engine</h2><p>Real algorithms, not mock-ups. The simulator above runs the exact same code you import.</p></div>
+      <div class="feat"><div class="card reveal"><div class="ic">◈</div><h3>Service catalog</h3><p>Owners, dependencies, deploy order (topological sort with cycle detection) and <b>blast radius</b> for any service.</p></div><div class="card reveal"><div class="ic">★</div><h3>Maturity scorecards</h3><p>Seven weighted checks (owner, docs, on-call, SLO, coverage, runbook, deps) roll up to Gold / Silver / Bronze.</p></div><div class="card reveal"><div class="ic">⚡</div><h3>Golden-path templates</h3><p>Node API, React web, Go worker and Python ML templates render a real <code class="mono">Deployment</code>, <code class="mono">Service</code>, <code class="mono">HPA</code> and <code class="mono">PodDisruptionBudget</code>.</p></div><div class="card reveal"><div class="ic">▦</div><h3>Kube-style scheduler</h3><p>Filter nodes that fit CPU/memory, then score by least-allocated plus anti-affinity spread. Pending pods retry every tick.</p></div><div class="card reveal"><div class="ic">⟳</div><h3>Rolling updates</h3><p>A reconcile loop honours <code class="mono">maxSurge</code> and <code class="mono">maxUnavailable</code>, so availability never drops below the replica target.</p></div><div class="card reveal"><div class="ic">↩</div><h3>SLO auto-rollback</h3><p>Multi-window burn-rate alerting (SRE workbook, 14.4× threshold) rolls back to the last healthy revision automatically.</p></div><div class="card reveal"><div class="ic">✚</div><h3>Self-healing</h3><p>Kill a node: its pods are evicted, rescheduled onto healthy nodes and the event stream records every step.</p></div><div class="card reveal"><div class="ic">⌘</div><h3>CLI included</h3><p><code class="mono">idp new</code>, <code class="mono">idp catalog</code>, <code class="mono">idp templates</code> and <code class="mono">idp simulate</code> give you the same engine from the terminal.</p></div></div>
+    </section>
+    <section class="section wrap" id="how">
+      <div class="sec-head reveal"><span class="kicker">How it works</span><h2>From request to result</h2></div>
+      <div class="steps"><div class="step reveal"><h3>Provision</h3><p>A golden path validates the DNS-1123 name, scaffolds the template, registers the service in the catalog and deploys <code class="mono">v1.0.0</code> to dev.</p></div><div class="step reveal"><h3>Schedule</h3><p>Each replica becomes a pod. The scheduler filters nodes by free CPU/memory and scores them to spread one app across nodes.</p></div><div class="step reveal"><h3>Release</h3><p>A new version triggers a rolling update: surge one new pod, wait for readiness, retire one old pod, repeat.</p></div><div class="step reveal"><h3>Observe</h3><p>Traffic generates RPS, p95 latency and error ratio per service. Burn rate = error ratio ÷ error budget, checked on fast and slow windows.</p></div><div class="step reveal"><h3>Roll back</h3><p>When both windows burn hot on a release, the platform rolls back to the last healthy revision and records it in release history.</p></div></div>
+    </section>
+    <section class="section wrap" id="arch">
+      <div class="sec-head reveal"><span class="kicker">Architecture</span><h2>System design</h2><p>Every box is a module in src/. Data flows left to right.</p></div>
+      <div class="card arch reveal"><svg viewBox="0 0 1160 310" role="img" aria-label="Architecture diagram"><path class="e" d="M272,113 C290,113 290,73 308,73"/><path class="f" d="M272,113 C290,113 290,73 308,73"/><text class="el" x="290" y="87" text-anchor="middle">provision</text><path class="e" d="M272,193 C290,193 290,73 308,73"/><path class="f" d="M272,193 C290,193 290,73 308,73"/><path class="e" d="M548,102 C578,102 578,124 548,124"/><path class="f" d="M548,102 C578,102 578,124 548,124"/><text class="el" x="578" y="113" text-anchor="middle">register</text><path class="e" d="M548,102 C578,102 578,204 548,204"/><path class="f" d="M548,102 C578,102 578,204 548,204"/><text class="el" x="578" y="153" text-anchor="middle">v1.0.0</text><path class="e" d="M562,233 C580,233 580,193 598,193"/><path class="f" d="M562,233 C580,233 580,193 598,193"/><text class="el" x="580" y="207" text-anchor="middle">rollout</text><path class="e" d="M838,164 C868,164 868,142 838,142"/><path class="f" d="M838,164 C868,164 868,142 838,142"/><text class="el" x="868" y="153" text-anchor="middle">pods</text><path class="e" d="M852,193 C870,193 870,113 888,113"/><path class="f" d="M852,193 C870,193 870,113 888,113"/><path class="e" d="M1128,142 C1158,142 1158,164 1128,164"/><path class="f" d="M1128,142 C1158,142 1158,164 1128,164"/><path class="e" d="M888,193 C725,193 725,233 562,233"/><path class="f" d="M888,193 C725,193 725,233 562,233"/><text class="el" x="725" y="207" text-anchor="middle">rollback</text><text class="lane" x="145" y="24" text-anchor="middle">DEVELOPER</text><g class="node k0"><rect x="18" y="84" width="254" height="58" rx="12"/><text x="145" y="109" text-anchor="middle">Portal UI</text><text class="s" x="145" y="123" text-anchor="middle">simulator</text></g><g class="node k0"><rect x="18" y="164" width="254" height="58" rx="12"/><text x="145" y="189" text-anchor="middle">idp CLI</text><text class="s" x="145" y="203" text-anchor="middle">new · catalog</text></g><text class="lane" x="435" y="24" text-anchor="middle">PLATFORM</text><g class="node kk2"><rect x="308" y="44" width="254" height="58" rx="12"/><text x="435" y="69" text-anchor="middle">Golden paths</text><text class="s" x="435" y="83" text-anchor="middle">templates</text></g><g class="node kk2"><rect x="308" y="124" width="254" height="58" rx="12"/><text x="435" y="149" text-anchor="middle">Catalog</text><text class="s" x="435" y="163" text-anchor="middle">scorecards</text></g><g class="node kk2"><rect x="308" y="204" width="254" height="58" rx="12"/><text x="435" y="229" text-anchor="middle">Release ctrl</text><text class="s" x="435" y="243" text-anchor="middle">history</text></g><text class="lane" x="725" y="24" text-anchor="middle">RUNTIME</text><g class="node kk3"><rect x="598" y="84" width="254" height="58" rx="12"/><text x="725" y="109" text-anchor="middle">Scheduler</text><text class="s" x="725" y="123" text-anchor="middle">filter + score</text></g><g class="node kk3"><rect x="598" y="164" width="254" height="58" rx="12"/><text x="725" y="189" text-anchor="middle">Deployments</text><text class="s" x="725" y="203" text-anchor="middle">rolling update</text></g><text class="lane" x="1015" y="24" text-anchor="middle">RELIABILITY</text><g class="node k0"><rect x="888" y="84" width="254" height="58" rx="12"/><text x="1015" y="109" text-anchor="middle">Metrics</text><text class="s" x="1015" y="123" text-anchor="middle">rps · p95 · err</text></g><g class="node k0"><rect x="888" y="164" width="254" height="58" rx="12"/><text x="1015" y="189" text-anchor="middle">SLO engine</text><text class="s" x="1015" y="203" text-anchor="middle">burn rate</text></g></svg></div>
+    </section>
+    <section class="section wrap" id="use">
+      <div class="sec-head reveal"><span class="kicker">Use it</span><h2>Ship it in your own stack</h2><p>Zero dependencies. Works in Node.js 18+ and modern browsers.</p></div>
+      <div class="tabs" data-tabs="use"><button class="on">JavaScript API</button><button>CLI</button><button>Install</button></div>
+      <div class="tabp on" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>example.js</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-k">import</span> { Platform, manifests } <span class="tk-k">from</span> <span class="tk-s">&quot;prism-devportal&quot;</span>;
+
+<span class="tk-k">const</span> p = <span class="tk-k">new</span> <span class="tk-f">Platform</span>({ nodes: <span class="tk-n">4</span> });
+p.<span class="tk-f">on</span>((e) =&gt; console.<span class="tk-f">log</span>(e.type, e.msg));
+
+<span class="tk-c">// golden path: catalog + manifests + v1.0.0</span>
+<span class="tk-k">const</span> { steps, manifests: yaml } = p.<span class="tk-f">provision</span>({
+  name: <span class="tk-s">&quot;payments-api&quot;</span>, template: <span class="tk-s">&quot;node-api&quot;</span>, team: <span class="tk-s">&quot;payments&quot;</span>, oncall: <span class="tk-k">true</span>,
+});
+
+<span class="tk-k">for</span> (<span class="tk-k">let</span> i = <span class="tk-n">0</span>; i &lt; <span class="tk-n">10</span>; i++) p.<span class="tk-f">tick</span>(<span class="tk-n">0.5</span>);   <span class="tk-c">// pods become Ready</span>
+p.<span class="tk-f">release</span>(<span class="tk-s">&quot;payments-api&quot;</span>, <span class="tk-s">&quot;1.1.0&quot;</span>);           <span class="tk-c">// rolling update</span>
+p.<span class="tk-f">release</span>(<span class="tk-s">&quot;payments-api&quot;</span>, <span class="tk-k">null</span>, { faulty: <span class="tk-k">true</span> }); <span class="tk-c">// bad build…</span>
+<span class="tk-k">for</span> (<span class="tk-k">let</span> i = <span class="tk-n">0</span>; i &lt; <span class="tk-n">40</span>; i++) p.<span class="tk-f">tick</span>(<span class="tk-n">0.5</span>);   <span class="tk-c">// …SLO burn → auto-rollback</span>
+
+console.<span class="tk-f">log</span>(p.<span class="tk-f">snapshot</span>()[<span class="tk-n">0</span>].version, p.stats.rollbacks); <span class="tk-c">// 1.1.0 1</span></code></pre></div></div>
+      <div class="tabp" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>terminal</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-pr">$ </span>npx github:krishyaa06/prism-devportal templates
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-devportal new orders <span class="tk-p">--template</span> go-worker <span class="tk-p">--team</span> payments &gt; orders.yaml
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-devportal catalog examples/catalog.json
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-devportal simulate <span class="tk-p">--seconds</span> 40</code></pre></div></div>
+      <div class="tabp" data-tabp="use"><div class="codebox"><div class="bar2"><i></i><i></i><i></i><span>terminal</span><button class="btn sm ghost copy" data-copy>Copy</button></div><pre><code><span class="tk-c"># use the CLI without installing</span>
+<span class="tk-pr">$ </span>npx github:krishyaa06/prism-devportal <span class="tk-p">--help</span>
+
+<span class="tk-c"># or add the engine to your project</span>
+<span class="tk-pr">$ </span>npm install github:krishyaa06/prism-devportal
+
+<span class="tk-c"># run the simulator locally</span>
+<span class="tk-pr">$ </span>git clone https://github.com/krishyaa06/prism-devportal.git &amp;&amp; cd prism-devportal
+<span class="tk-pr">$ </span>npx serve .   # then open http://localhost:3000</code></pre></div></div>
+    </section>
+  </main>
+  <footer class="foot"><div class="wrap">
+    <span>◆ Prism DevPortal · Prism Systems 01/49 · Built by <a href="https://github.com/krishyaa06">Soumya Bhandare</a> &amp; <a href="https://dc.gg/prismprotocol" target="_blank" rel="noreferrer">Prism Protocol</a></span>
+    <span><a href="https://github.com/krishyaa06/prism-devportal" target="_blank" rel="noreferrer">Source</a> · <a href="https://github.com/krishyaa06/prism-devportal/blob/main/docs/ARCHITECTURE.md">Architecture</a> · <a href="https://github.com/krishyaa06/prism-devportal/blob/main/docs/USAGE.md">Docs</a> · MIT License</span>
+  </div></footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

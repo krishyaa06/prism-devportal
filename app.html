@@ -1,0 +1,41 @@
+<div class="sim">
+  <div class="main">
+    <div class="panel glow">
+      <div class="toolbar">
+        <button class="btn primary sm" data-play>▶ Run</button>
+        <select data-speed aria-label="Speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select>
+        <span class="sep"></span>
+        <select id="svc" aria-label="Service"></select>
+        <button class="btn sm" id="deploy">Deploy next</button>
+        <button class="btn sm bad" id="bad">Ship bad release</button>
+        <button class="btn sm" id="rollback">Rollback</button>
+        <button class="btn sm" id="scale">Scale +1</button>
+        <span class="sep"></span>
+        <button class="btn sm ghost" id="kill">Kill a node</button>
+        <span class="sp"></span>
+        <span class="live"><i></i> paused</span>
+      </div>
+      <div id="kpis" style="margin-top:12px"></div>
+    </div>
+    <div class="viz" id="cvw" style="height:270px"><span class="tag">Cluster · nodes &amp; pods (color = service, ring = version)</span><canvas id="cv"></canvas></div>
+    <div class="g2 grid">
+      <div class="panel"><div class="ph">Error ratio · selected service<span class="sp"></span><span class="pill" id="burn">burn 0×</span></div><canvas class="chart" id="ch1" style="height:150px"></canvas></div>
+      <div class="panel"><div class="ph">p95 latency · rps</div><canvas class="chart" id="ch2" style="height:150px"></canvas></div>
+    </div>
+    <div class="panel"><div class="ph">Service catalog<span class="sp"></span><span class="pill dim" id="ord"></span></div>
+      <div class="scroll" style="max-height:260px"><table class="tbl" id="cat"><thead><tr><th>Service</th><th>Team</th><th>Version</th><th class="r">Ready</th><th class="r">RPS</th><th class="r">p95</th><th class="r">Errors</th><th>Scorecard</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><div class="ph">Golden path · new service</div>
+      <label class="f">Name <input id="nm" value="checkout-api" spellcheck="false" /></label>
+      <label class="f">Template <select id="tpl"></select></label>
+      <label class="f">Team <select id="team"><option>payments</option><option>growth</option><option>platform</option><option>data</option></select></label>
+      <button class="btn primary" id="create" style="width:100%;margin-top:6px">Provision service</button>
+      <div id="steps" class="log" style="height:150px;margin-top:10px"><div><span class="dim">Pick a name + template, then provision. The pipeline scaffolds, registers and deploys v1.0.0.</span></div></div>
+    </div>
+    <div class="panel"><div class="ph">Release history</div><div id="hist" class="log" style="height:150px"></div></div>
+    <div class="panel"><div class="ph">Platform events</div><div id="log" class="log" style="height:230px"></div></div>
+    <div class="panel"><div class="ph">Generated manifest</div><pre id="yaml" class="log" style="height:180px;white-space:pre"></pre></div>
+  </div>
+</div>
