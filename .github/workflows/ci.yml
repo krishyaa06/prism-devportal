@@ -18,4 +18,5 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm test
       - name: Smoke test
-        run: node bin/idp.js simulate --seconds 30 && node bin/idp.js new demo-svc | grep -q 'kind: Deployment'
+        run: |
+          node bin/idp.js simulate --seconds 30 && node bin/idp.js new demo-svc | grep -q 'kind: Deployment'
